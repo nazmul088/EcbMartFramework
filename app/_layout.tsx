@@ -1,5 +1,4 @@
 import { Slot, useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import React, { useState } from "react";
 
 export default function RootLayout() {
@@ -7,8 +6,8 @@ export default function RootLayout() {
   const router = useRouter();
 
   const checkAuth = async () => {
-    const token = await SecureStore.getItemAsync("authToken");
-    console.log("Token:", token);
+    // const token = await SecureStore.getItemAsync("authToken");
+    // console.log("Token:", token);
   };
   checkAuth();
 
