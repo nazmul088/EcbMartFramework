@@ -30,5 +30,9 @@ export default function RootLayout() {
   //   );
   // }
 
-  return <Slot />;
+  return (
+    // <CartProvider>
+      <Slot />
+    // </CartProvider>
+  );
 }

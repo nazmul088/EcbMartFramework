@@ -1,12 +1,25 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import ShowProducts, { Product } from './product';
+import ShowProducts from './product';
 
 export default function HomeScreen() {
-  const [addedToCart, setAddedToCart] = useState<Product[]>([]);
+  const [addedToCart, setAddedToCart] = useState([]);
   const [search, setSearch] = useState("");
+  const navigation = useNavigation();
+
+  useEffect(() => {
+  AsyncStorage.getItem("cart").then((data) => {
+    if (data) setAddedToCart(JSON.parse(data));
+  });
+}, []);
+
+useEffect(() => {
+  AsyncStorage.setItem("cart", JSON.stringify(addedToCart));
+}, [addedToCart]);
 
   return (
     <View style={styles.container}>
@@ -25,7 +38,12 @@ export default function HomeScreen() {
             onChangeText={setSearch}
           />
           <View style={styles.contentFlow}>
-            <MaterialIcons style={styles.cartIconStyle} name="shopping-cart" size={24} />
+            <MaterialIcons
+              style={styles.cartIconStyle}
+              name="shopping-cart"
+              size={24}
+              onPress={() => navigation.navigate('cart')}
+            />
             <View style={styles.counterBadge}>
               <Text style={styles.counterText}>{addedToCart.length}</Text>
             </View>
@@ -58,6 +76,7 @@ const styles = StyleSheet.create({
   cartIconStyle: {
     color: 'red',
     marginRight: 10,
+    cursor: "pointer"
   },
   counterBadge: {
     position: 'absolute',

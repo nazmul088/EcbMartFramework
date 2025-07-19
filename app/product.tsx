@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { environment } from "./environments/environment";
 
-// Define a Product type for type safety
 export interface Product {
   id?: string | number;
   name?: string;
   description?: string;
   price?: number;
   svgImage?: string;
+  quantity?: number;
 }
 
 function getSvgXml(svgImage?: string) {
@@ -33,18 +33,18 @@ export default function ShowProducts({ addedToCart, setAddedToCart }: ShowProduc
   }, []);
 
   function handleCartAction(product: Product) {
-    const isAdded = addedToCart.some((p) => p.id === product.id);
+    const isAdded = addedToCart?.some((p) => p.id === product.id);
     if (isAdded) {
       setAddedToCart((prev) => prev.filter((p) => p.id !== product.id));
     } else {
-      setAddedToCart((prev) => [...prev, product]);
+      setAddedToCart((prev) => [...prev, { ...product, quantity: 1 }]);
     }
   }
 
   return (
     <View style={styles.container}>
       {products.map((product, idx) => {
-        const isAdded = addedToCart.some((p) => p.id === product.id);
+        const isAdded = addedToCart?.some((p) => p.id === product.id);
         return (
           <View key={product.id || idx} style={styles.productCard}>
             <Image
