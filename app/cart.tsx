@@ -1,290 +1,315 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Product } from "./product";
+
+export interface CartItems {
+  items: Product[];
+  subTotal: number;
+  deliveryCharge: number;
+  discount: number;
+  total: number;
+  paymentMethod?: string;
+}
+
+function getImageUri(base64Image?: string) {
+  return `data:image/png;base64,${base64Image}`;
+}
 
 export default function CartScreen() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      title: 'Pi Pizza Oven',
-      subtitle: 'Estimated Ship Date: June 6th',
-      fuelSource: 'Fuel Source: Wood Only',
-      price: 469.99,
-      quantity: 1,
-      image: 'https://cdn.example.com/pizza-oven.jpg',
-    },
-    {
-      id: '2',
-      title: 'Grill Ultimate Bundle',
-      subtitle: 'Add accident protection for $29.99',
-      price: 549.99,
-      quantity: 1,
-      image: 'https://cdn.example.com/grill-bundle.jpg',
-    },
-    {
-      id: '3',
-      title: 'Starters (4 pack)',
-      price: 0.0,
-      quantity: 1,
-      image: 'https://cdn.example.com/starters.jpg',
-    },
-    {
-      id: '4',
-      title: 'Charcoal Grill Pack',
-      price: 0.0,
-      quantity: 1,
-      image: 'https://cdn.example.com/charcoal.jpg',
-    },
-  ]);
+  const screenWidth = Dimensions.get('window').width;
+  // Use smaller image size for mobile screens
+  const imageSize = screenWidth < 500 ? 60 : 100;
+  // Remove item from cart
+  const removeCartItem = (index: number) => {
+    const updatedCart = [...addedToCart];
+    updatedCart.splice(index, 1);
+    setAddedToCart(updatedCart);
+  };
+  // Helper to update cart quantity
+  const updateCartQuantity = (index: number, delta: number) => {
+    const updatedCart = [...addedToCart];
+    const currentQty = updatedCart[index].quantity ?? 1;
+    const newQty = currentQty + delta;
+    if (newQty < 1) return;
+    updatedCart[index].quantity = newQty;
+    setAddedToCart(updatedCart);
+  };
+  const [addedToCart, setAddedToCart] = useState<Product[]>([]);
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const tax = 102.0;
-  const total = subtotal + tax;
+  // Load cart on mount
+  useEffect(() => {
+    AsyncStorage.getItem("cart").then((data) => {
+      if (data) setAddedToCart(JSON.parse(data));
+    });
+  }, []);
 
-  function handleQuantityChange(id, delta) {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  }
-
-  function handleRemoveItem(id) {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  }
+  // Save cartItems object whenever cart changes
+  useEffect(() => {
+    const subTotal = addedToCart.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0);
+    const deliveryCharge = 5;
+    const discount = 0;
+    const total = subTotal + deliveryCharge - discount;
+    const cartItems: CartItems = {
+      items: addedToCart,
+      subTotal,
+      deliveryCharge,
+      discount,
+      total,
+    };
+    AsyncStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [addedToCart]);
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Your Cart ({cartItems.length} items)</Text>
+    <View style={{ display: "flex", flexDirection: "column" }}>
+      <LinearGradient
+        colors={["#90F7EC", "#32CCBC"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ padding: 8, height: 53 }}
+      ></LinearGradient>
 
-      {/* Cart Table Header */}
-      <View style={styles.tableHeader}>
-        <Text style={[styles.headerCell, {flex: 2.2}]}>Item</Text>
-        <Text style={[styles.headerCell, {flex: 1}]}>Price</Text>
-        <Text style={[styles.headerCell, {flex: 1.2}]}>Quantity</Text>
-        <Text style={[styles.headerCell, {flex: 1}]}>Total</Text>
-      </View>
-
-      {cartItems.map((item) => (
-        <View key={item.id} style={styles.cartItem}>
-          {/* Close Icon */}
-          <TouchableOpacity style={styles.closeIcon} onPress={() => handleRemoveItem(item.id)}>
-            <MaterialIcons name="close" size={20} color="#888" />
-          </TouchableOpacity>
-          {/* Image */}
-          <Image source={{ uri: item.image }} style={styles.image} />
-          {/* Product Name and Subtitle */}
-          <View style={styles.nameContent}>
-            <Text style={styles.title}>{item.title}</Text>
-            {item.subtitle && (
-              <Text style={styles.subtitle}>{item.subtitle}</Text>
-            )}
-            {item.fuelSource && (
-              <Text style={styles.fuel}>{item.fuelSource}</Text>
-            )}
-          </View>
-          {/* Price */}
-          <View style={styles.priceContent}>
-            <Text style={styles.unitPrice}>${item.price.toFixed(2)}</Text>
-          </View>
-          {/* Quantity */}
-          <View style={styles.quantityContent}>
-            <View style={styles.quantityContainer}>
-              <TouchableOpacity onPress={() => handleQuantityChange(item.id, -1)}>
-                <Text style={styles.qtyButton}>−</Text>
-              </TouchableOpacity>
-              <Text style={styles.quantity}>{item.quantity}</Text>
-              <TouchableOpacity onPress={() => handleQuantityChange(item.id, 1)}>
-                <Text style={styles.qtyButton}>＋</Text>
-              </TouchableOpacity>
+      <h3 style={{ textAlign: "center" }}>
+        Your Cart ({addedToCart.length} Items)
+      </h3>
+      <View style={styles.container}>
+        <View style={styles.cartHeader}>
+          <Text style={{ flex: 2, textAlign: "left", fontWeight: "bold" }}>Item</Text>
+          <Text style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>Price</Text>
+          <Text style={{ flex: 1.2, textAlign: "center", minWidth: 90, fontWeight: "bold" }}>
+            Quantity
+          </Text>
+          <Text style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>Total</Text>
+          <Text style={{ flex: 0.5, textAlign: "center" }}></Text>
+        </View>
+        <View
+          style={{
+            borderBottomWidth: 1,
+            borderColor: "#e0e0e0",
+            marginVertical: 8,
+            width: "100%",
+          }}
+        />
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+          {addedToCart.map((item, index) => (
+            <View key={index} style={styles.cartItem}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  width: "100%",
+                }}
+              >
+                <View
+                  style={{ flex: 2, flexDirection: "row", alignItems: "center" }}
+                >
+                  {item.svgImage && (
+                    <View style={{ width: imageSize, height: imageSize, marginRight: 8 }}>
+                      <Image
+                        source={{ uri: getImageUri(item.svgImage) }}
+                        style={{ width: imageSize, height: imageSize }}
+                      />
+                    </View>
+                  )}
+                  <Text style={{ flex: 2, fontSize : 16}}>{item.name}</Text>
+                </View>
+                <Text style={{ flex: 1, textAlign: "center" }}>
+                  ${item.price}
+                </Text>
+                <View
+                  style={{
+                    flex: 1.2,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: 90,
+                  }}
+                >
+                  <View style={styles.quantityContainer}>
+                    <Text
+                      style={styles.quatityDecreaseContent}
+                      onPress={() => updateCartQuantity(index, -1)}
+                    >
+                      -
+                    </Text>
+                    <Text style={styles.quantityValueContent}>
+                      {item.quantity}
+                    </Text>
+                    <Text
+                      style={styles.quantityIncreaseContent}
+                      onPress={() => updateCartQuantity(index, 1)}
+                    >
+                      +
+                    </Text>
+                  </View>
+                </View>
+                <Text style={{ flex: 1, textAlign: "center" }}>
+                  ${(item.price ?? 0) * (item.quantity ?? 1)}
+                </Text>
+                <View style={{ flex: 0.5, alignItems: "center" }}>
+                  <MaterialIcons
+                    name="delete"
+                    size={24}
+                    color="#d11a2a"
+                    style={{ marginLeft: 8 }}
+                    onPress={() => removeCartItem(index)}
+                  />
+                </View>
+              </View>
             </View>
+          ))}
+        </ScrollView>
+      </View>
+      {/* Summary Section */}
+      <View style={styles.summaryRowContainer}>
+        <View style={styles.summaryInnerBox}>
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Subtotal:</Text>
+            <Text style={styles.summaryValue}>
+              ${addedToCart.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0).toFixed(2)}
+            </Text>
           </View>
-          {/* Total */}
-          <View style={styles.totalContent}>
-            <Text style={styles.itemTotal}>${(item.price * item.quantity).toFixed(2)}</Text>
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Delivery Charge:</Text>
+            <Text style={styles.summaryValue}>$5.00</Text>
+          </View>
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Discount:</Text>
+            <Text style={styles.summaryValue}>$0.00</Text>
+          </View>
+          <View style={[styles.summaryBox, { borderTopWidth: 1, borderTopColor: '#eee', marginTop: 8, paddingTop: 8 }]}> 
+            <Text style={[styles.summaryLabel, { fontWeight: 'bold' }]}>Total:</Text>
+            <Text style={[styles.summaryValue, { fontWeight: 'bold', color: '#32CCBC' }]}> 
+              ${(addedToCart.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0) + 5).toFixed(2)}
+            </Text>
           </View>
         </View>
-      ))}
-
-      <View style={styles.summary}>
-        <Text style={styles.line}>Subtotal: ${subtotal.toFixed(2)}</Text>
-        <Text style={styles.line}>Sales Tax: ${tax.toFixed(2)}</Text>
-        <TextInput placeholder="Add Coupon" style={styles.couponInput} />
-        <Text style={styles.total}>Grand total: ${total.toFixed(2)}</Text>
-        <Text style={styles.freeShipping}>
-          Congrats, you're eligible for{' '}
-          <Text style={{ fontWeight: 'bold' }}>Free Shipping</Text>
-        </Text>
-        <TouchableOpacity style={styles.checkoutBtn}>
-          <Text style={styles.checkoutText}>Check out</Text>
-        </TouchableOpacity>
       </View>
-    </ScrollView>
+      <View style={styles.checkoutButtonRowContainer}>
+        <View style={styles.checkoutButtonContainer}>
+          <Text style={styles.checkoutButton} onPress={() => {router.push('/checkout')}}>
+            Checkout
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, backgroundColor: '#fff' },
-  header: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
+  summaryRowContainer: {
+    width: '100%',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    marginTop: 8,
+    marginBottom: 8,
   },
-  cartItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 16,
-    position: 'relative',
+  summaryInnerBox: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    paddingTop: 12,
-    minHeight: 100,
-    flexWrap: 'wrap',
-    elevation: 2,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-  },
-  closeIcon: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 2,
-    padding: 4,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    elevation: 1,
-  },
-  nameContent: {
-    flex: 2.2,
-    justifyContent: 'center',
-    marginRight: 6,
-    minWidth: 100,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 4,
+    minWidth: 120,
     maxWidth: 140,
+    alignSelf: 'flex-end',
+    marginRight: '16%', // Adjust this value to match the right edge of the Total column
   },
-  priceContent: {
-    flex: 1,
-    alignItems: 'center',
-    minWidth: 60,
+  checkoutButtonRowContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 16,
   },
-  quantityContent: {
-    flex: 1.2,
-    alignItems: 'center',
-    minWidth: 80,
-  },
-  totalContent: {
-    flex: 1,
-    alignItems: 'center',
-    minWidth: 60,
-  },
-  image: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    marginRight: 10,
-    marginLeft: 4,
-    marginTop: 4,
-    backgroundColor: '#f8f8f8',
-  },
-  middleContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  rightContent: {
+  checkoutButtonContainer: {
     alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    height: 80,
+    marginTop: 12,
   },
-  title: { fontWeight: '600', fontSize: 15, marginBottom: 2, flexWrap: 'wrap' },
-  subtitle: { color: 'orange', fontWeight: 'bold', fontSize: 12, flexWrap: 'wrap' },
-  fuel: { fontSize: 11, color: '#555', flexWrap: 'wrap' },
-  unitPrice: { fontSize: 15, fontWeight: 'bold' },
-  itemTotal: {
-    fontSize: 13,
+  checkoutButton: {
+    backgroundColor: '#32CCBC',
+    color: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    fontWeight: 'bold',
+    fontSize: 16,
+    shadowColor: '#32CCBC',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  summaryBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+    marginRight: '16%',
+  },
+  summaryLabel: {
+    fontSize: 15,
+    color: '#333',
+  },
+  summaryValue: {
+    fontSize: 15,
     color: '#333',
     fontWeight: '500',
+  },
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    padding: 16,
+    marginTop: 8,
+  },
+  cartHeader: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  cartItems: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  cartItem: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    paddingVertical: 8,
+    alignItems: "center",
   },
   quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 6,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-  },
-  qtyButton: {
-    fontSize: 20,
-    paddingHorizontal: 8,
-    color: '#000',
-    fontWeight: 'bold',
-  },
-  quantity: {
-    fontSize: 15,
-    marginHorizontal: 6,
-    fontWeight: '500',
-    minWidth: 18,
-    textAlign: 'center',
-  },
-  summary: {
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    paddingTop: 20,
-    marginTop: 10,
-  },
-  line: { fontSize: 16, marginBottom: 8 },
-  couponInput: {
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
+    borderColor: "black",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: "#F8F8F8",
+    marginLeft: 8,
+    marginRight: 8,
   },
-  total: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  freeShipping: { color: 'green', marginBottom: 20 },
-  checkoutBtn: {
-    backgroundColor: 'black',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  checkoutText: { color: '#fff', fontWeight: 'bold' },
-  tableHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#bbb',
-    marginBottom: 8,
-    marginTop: 8,
-    backgroundColor: '#f6f6f6',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    paddingTop: 8,
+  quatityDecreaseContent: {
+    fontSize: 18,
+    color: "red",
+    fontWeight: "bold",
+    marginRight: 12,
     paddingHorizontal: 4,
   },
-  headerCell: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
+  quantityValueContent: {
+    fontSize: 16,
+    marginHorizontal: 8,
+  },
+  quantityIncreaseContent: {
+    fontSize: 18,
+    color: "green",
+    fontWeight: "bold",
+    marginLeft: 12,
+    paddingHorizontal: 4,
   },
 });

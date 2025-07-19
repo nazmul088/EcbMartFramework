@@ -1,13 +1,14 @@
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Button, StyleSheet, TextInput, View } from "react-native";
 import { verifyOtp } from "../services/authApi";
 import { storeToken } from "../services/authService";
 
-const OtpScreen = ({ route, navigation }: any) => {
+const OtpScreen = ({ route }: any) => {
   const [otp, setOtp] = useState("");
   const { phoneNumber } = route.params;
-
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleVerifyOtp = async () => {
     if (loading) return;
@@ -17,7 +18,7 @@ const OtpScreen = ({ route, navigation }: any) => {
       const token = res.data.token;
       console.log(res);
       await storeToken(token);
-      navigation.navigate("Home");
+      router.replace('/home');
     } catch (err) {
       Alert.alert("Error", "Invalid OTP");
     } finally {
