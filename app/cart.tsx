@@ -64,7 +64,7 @@ export default function CartScreen() {
   }, [addedToCart]);
 
   return (
-    <View style={{ display: "flex", flexDirection: "column" }}>
+    <View style={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <LinearGradient
         colors={["#90F7EC", "#32CCBC"]}
         start={{ x: 0, y: 0 }}
@@ -72,28 +72,28 @@ export default function CartScreen() {
         style={{ padding: 8, height: 53 }}
       ></LinearGradient>
 
-      <h3 style={{ textAlign: "center" }}>
+      <Text style={{ textAlign: "center", fontSize: 22, fontWeight: "bold", marginVertical: 12 }}>
         Your Cart ({addedToCart.length} Items)
-      </h3>
-      <View style={styles.container}>
-        <View style={styles.cartHeader}>
-          <Text style={{ flex: 2, textAlign: "left", fontWeight: "bold" }}>Item</Text>
-          <Text style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>Price</Text>
-          <Text style={{ flex: 1.2, textAlign: "center", minWidth: 90, fontWeight: "bold" }}>
-            Quantity
-          </Text>
-          <Text style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>Total</Text>
-          <Text style={{ flex: 0.5, textAlign: "center" }}></Text>
-        </View>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: "#e0e0e0",
-            marginVertical: 8,
-            width: "100%",
-          }}
-        />
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+      </Text>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+        <View style={styles.container}>
+          <View style={styles.cartHeader}>
+            <Text style={{ flex: 2, textAlign: "left", fontWeight: "bold" }}>Item</Text>
+            <Text style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>Price</Text>
+            <Text style={{ flex: 1.2, textAlign: "center", minWidth: 90, fontWeight: "bold" }}>
+              Quantity
+            </Text>
+            <Text style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>Total</Text>
+            <Text style={{ flex: 0.5, textAlign: "center" }}></Text>
+          </View>
+          <View
+            style={{
+              borderBottomWidth: 1,
+              borderColor: "#e0e0e0",
+              marginVertical: 8,
+              width: "100%",
+            }}
+          />
           {addedToCart.map((item, index) => (
             <View key={index} style={styles.cartItem}>
               <View
@@ -161,40 +161,40 @@ export default function CartScreen() {
               </View>
             </View>
           ))}
-        </ScrollView>
-      </View>
-      {/* Summary Section */}
-      <View style={styles.summaryRowContainer}>
-        <View style={styles.summaryInnerBox}>
-          <View style={styles.summaryBox}>
-            <Text style={styles.summaryLabel}>Subtotal:</Text>
-            <Text style={styles.summaryValue}>
-              ${addedToCart.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0).toFixed(2)}
-            </Text>
+        </View>
+        {/* Summary Section */}
+        <View style={styles.summaryRowContainer}>
+          <View style={styles.summaryInnerBox}>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryLabel}>Subtotal:</Text>
+              <Text style={styles.summaryValue}>
+                ${addedToCart.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0).toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryLabel}>Delivery Charge:</Text>
+              <Text style={styles.summaryValue}>$5.00</Text>
+            </View>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryLabel}>Discount:</Text>
+              <Text style={styles.summaryValue}>$0.00</Text>
+            </View>
+            <View style={[styles.summaryBox, { borderTopWidth: 1, borderTopColor: '#eee', marginTop: 8, paddingTop: 8 }]}> 
+              <Text style={[styles.summaryLabel, { fontWeight: 'bold' }]}>Total:</Text>
+              <Text style={[styles.summaryValue, { fontWeight: 'bold', color: '#32CCBC' }]}> 
+                ${(addedToCart.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0) + 5).toFixed(2)}
+              </Text>
+            </View>
           </View>
-          <View style={styles.summaryBox}>
-            <Text style={styles.summaryLabel}>Delivery Charge:</Text>
-            <Text style={styles.summaryValue}>$5.00</Text>
-          </View>
-          <View style={styles.summaryBox}>
-            <Text style={styles.summaryLabel}>Discount:</Text>
-            <Text style={styles.summaryValue}>$0.00</Text>
-          </View>
-          <View style={[styles.summaryBox, { borderTopWidth: 1, borderTopColor: '#eee', marginTop: 8, paddingTop: 8 }]}> 
-            <Text style={[styles.summaryLabel, { fontWeight: 'bold' }]}>Total:</Text>
-            <Text style={[styles.summaryValue, { fontWeight: 'bold', color: '#32CCBC' }]}> 
-              ${(addedToCart.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0) + 5).toFixed(2)}
+        </View>
+        <View style={styles.checkoutButtonRowContainer}>
+          <View style={styles.checkoutButtonContainer}>
+            <Text style={styles.checkoutButton} onPress={() => {router.push('/checkout')}}>
+              Checkout
             </Text>
           </View>
         </View>
-      </View>
-      <View style={styles.checkoutButtonRowContainer}>
-        <View style={styles.checkoutButtonContainer}>
-          <Text style={styles.checkoutButton} onPress={() => {router.push('/checkout')}}>
-            Checkout
-          </Text>
-        </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
