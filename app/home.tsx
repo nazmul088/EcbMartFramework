@@ -1,15 +1,15 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from 'expo-router';
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import type { Product } from './product';
 import ShowProducts from './product';
 
 export default function HomeScreen() {
-  const [addedToCart, setAddedToCart] = useState([]);
+  const [addedToCart, setAddedToCart] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
-  const navigation = useNavigation();
 
   useEffect(() => {
   AsyncStorage.getItem("cart").then((data) => {
@@ -42,13 +42,19 @@ useEffect(() => {
               style={styles.cartIconStyle}
               name="shopping-cart"
               size={24}
-              onPress={() => navigation.navigate('cart')}
+              onPress={() => router.push('/cart')}
             />
             <View style={styles.counterBadge}>
               <Text style={styles.counterText}>{addedToCart.length}</Text>
             </View>
           </View>
         </View>
+        <TouchableOpacity
+          style={styles.orderSummaryButton}
+          onPress={() => router.push('/order-history')}
+        >
+          <Text style={styles.orderSummaryButtonText}>See Order Summary</Text>
+        </TouchableOpacity>
       </LinearGradient>
       <ShowProducts addedToCart={addedToCart} setAddedToCart={setAddedToCart} />
     </View>
@@ -114,5 +120,25 @@ const styles = StyleSheet.create({
     minWidth: 120,
     flex: 1,
     marginLeft: 12,
+  },
+  orderSummaryButton: {
+    backgroundColor: '#32CCBC',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 4,
+    shadowColor: '#32CCBC',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  orderSummaryButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

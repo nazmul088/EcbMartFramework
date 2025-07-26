@@ -28,16 +28,21 @@ export default function CheckoutScreen() {
     total: 0,
     items: [],
   });
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
 
   const handleOrderButtonClick = async() => {
+    if (isPlacingOrder) return;
+    setIsPlacingOrder(true);
     //Need to call Backend API to place order
     if (!name || !address || !mobileNumber) {
       alert("Please fill all fields");
+      setIsPlacingOrder(false);
       return;
     }
     if (orderSummary.items.length === 0) {
       alert("No products in cart");
+      setIsPlacingOrder(false);
       return;
     }
 
@@ -69,10 +74,10 @@ export default function CheckoutScreen() {
       if (!response.ok) {
         throw new Error('Failed to place order');
       }
-      const data = await response.json();
       alert("Order placed successfully");
       // Clear cart after successful order
       await AsyncStorage.removeItem("cartItems");
+      await AsyncStorage.removeItem("cart");
       setOrderSummary({
         subTotal: 0,
         deliveryCharge: 0,
@@ -80,9 +85,11 @@ export default function CheckoutScreen() {
         total: 0,
         items: [],
       });
+      setIsPlacingOrder(false);
     } catch (error) {
       console.error("Error placing order:", error);
       alert("Failed to place order. Please try again.");  
+      setIsPlacingOrder(false);
   }
 }
 
@@ -352,8 +359,9 @@ export default function CheckoutScreen() {
           <button
             style={styles.proceedButton}
             onClick={handleOrderButtonClick}
+            disabled={isPlacingOrder}
           >
-            Proceed to Order
+            {isPlacingOrder ? 'Processing...' : 'Proceed to Order'}
           </button>
         </View>
       </ScrollView>
