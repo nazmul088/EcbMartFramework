@@ -1,6 +1,8 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from 'expo-router';
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
@@ -114,8 +116,16 @@ export default function CheckoutScreen() {
         colors={["#90F7EC", "#32CCBC"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={{ padding: 8, height: 53 }}
-      ></LinearGradient>
+        style={{ padding: 8, height: 53, flexDirection: 'row', alignItems: 'center' }}
+      >
+        <MaterialIcons
+          name="arrow-back"
+          size={28}
+          color="#222"
+          style={{ marginRight: 12 }}
+          onPress={() => router.back()}
+        />
+      </LinearGradient>
       <ScrollView style={styles.checkoutParentContainer}>
         {isMobile ? (
           <>
@@ -347,7 +357,7 @@ export default function CheckoutScreen() {
                 ]}
               >
                 <Text style={{ fontWeight: "bold" }}>Total:</Text>
-                <Text style={{ fontWeight: "bold", color: "#32CCBC" }}>
+                <Text style={{ fontWeight: "bold", color: "black" }}>
                   ${orderSummary.total.toFixed(2)}
                 </Text>
               </View>
@@ -356,13 +366,12 @@ export default function CheckoutScreen() {
         )}
 
         <View style = { styles.proceedButtonRow}>
-          <button
+          <Text
             style={styles.proceedButton}
-            onClick={handleOrderButtonClick}
-            disabled={isPlacingOrder}
+            onPress={handleOrderButtonClick}
           >
             {isPlacingOrder ? 'Processing...' : 'Proceed to Order'}
-          </button>
+          </Text>
         </View>
       </ScrollView>
     </View>

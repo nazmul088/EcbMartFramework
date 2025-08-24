@@ -69,13 +69,21 @@ export default function CartScreen() {
         colors={["#90F7EC", "#32CCBC"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={{ padding: 8, height: 53 }}
-      ></LinearGradient>
+        style={{ padding: 8, height: 53, flexDirection: 'row', alignItems: 'center' }}
+      >
+        <MaterialIcons
+          name="arrow-back"
+          size={28}
+          color="#222"
+          style={{ marginRight: 12 }}
+          onPress={() => router.back()}
+        />
+      </LinearGradient>
 
       <Text style={{ textAlign: "center", fontSize: 22, fontWeight: "bold", marginVertical: 12 }}>
         Your Cart ({addedToCart.length} Items)
       </Text>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 8 }}>
         <View style={styles.container}>
           <View style={styles.cartHeader}>
             <Text style={{ flex: 2, textAlign: "left", fontWeight: "bold" }}>Item</Text>

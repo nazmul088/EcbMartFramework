@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 import { environment } from './environments/environment';
-import ShowProducts from './product';
+import HomeScreen from './home';
 
 export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
@@ -31,17 +31,6 @@ export default function PhoneScreen() {
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <ShowProducts />
-      {/* <TextInput
-        placeholder="Enter 11-digit phone number"
-        keyboardType="number-pad"
-        value={phone}
-        onChangeText={setPhone}
-        maxLength={11}
-        style={{ borderWidth: 1, marginBottom: 12, padding: 8 }}
-      />
-      <Button title="Request OTP" onPress={handleRequestOtp} /> */}
-    </View>
+      <HomeScreen />
   );
 }

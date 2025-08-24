@@ -42,32 +42,35 @@ export default function ShowProducts({ addedToCart, setAddedToCart }: ShowProduc
   }
 
   return (
-    <View style={styles.container}>
-      {products.map((product, idx) => {
-        const isAdded = addedToCart?.some((p) => p.id === product.id);
-        return (
-          <View key={product.id || idx} style={styles.productCard}>
-            <Image
-              source={{ uri: getSvgXml(product.svgImage) }}
-              style={styles.productImage}
-            />
-            <Text style={styles.productName}>{product.name || "No Name"}</Text>
-            <Text style={styles.description}>{product.description || ""}</Text>
-            <Text style={styles.productPrice}>
-              {product.price ? `${product.price} Tk` : ""}
-            </Text>
-            <Button
-              onPress={() => {
-                handleCartAction(product);
-              }}
-              style={isAdded ? [styles.addToCartButton, styles.removeFromCartButton] : styles.addToCartButton}
-              color="white"
-            >
-              {isAdded ? "Remove from cart" : "Add to Cart"}
-            </Button>
-          </View>
-        );
-      })}
+    <View style={styles.outerContainer}>
+      <Text style={styles.productLabel}>Product</Text>
+      <View style={styles.container}>
+        {products.map((product, idx) => {
+          const isAdded = addedToCart?.some((p) => p.id === product.id);
+          return (
+            <View key={product.id || idx} style={styles.productCard}>
+              <Image
+                source={{ uri: getSvgXml(product.svgImage) }}
+                style={styles.productImage}
+              />
+              <Text style={styles.productName}>{product.name || "No Name"}</Text>
+              <Text style={styles.description}>{product.description || ""}</Text>
+              <Text style={styles.productPrice}>
+                {product.price ? `${product.price} Tk` : ""}
+              </Text>
+              <Button
+                onPress={() => {
+                  handleCartAction(product);
+                }}
+                style={isAdded ? [styles.addToCartButton, styles.removeFromCartButton] : styles.addToCartButton}
+                color="white"
+              >
+                {isAdded ? "Remove from cart" : "Add to Cart"}
+              </Button>
+            </View>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -119,5 +122,25 @@ const styles = StyleSheet.create({
   },
   removeFromCartButton: {
     backgroundColor: '#FF5252', // red for remove
+  },
+  outerContainer: {
+    borderWidth: 2,
+    borderColor: '#32CCBC',
+    borderRadius: 12,
+    margin: 16,
+    paddingTop: 18,
+    position: 'relative',
+    backgroundColor: 'white',
+  },
+  productLabel: {
+    position: 'absolute',
+    top: 6,
+    left: 8,
+    backgroundColor: 'white',
+    paddingHorizontal: 8,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+    zIndex: 1,
   },
 });
