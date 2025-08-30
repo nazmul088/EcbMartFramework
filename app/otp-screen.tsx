@@ -1,12 +1,15 @@
 import CryptoJS from 'crypto-js';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { environment } from './environments/environment';
+import { requestOtp, verifyOtp } from '../services/authApi';
+import { useAuth } from './AuthContext';
 
 export default function OtpScreen() {
   const [otp, setOtp] = useState('');
   const [resendDisabled, setResendDisabled] = useState(false);
+  const { login } = useAuth();
   const params = useLocalSearchParams();
   const encrypted = params.token as string || '';
   let mobile = '';
@@ -23,37 +26,28 @@ export default function OtpScreen() {
       return;
     }
     try {
-      const response = await fetch(`${environment.apiUrl}/api/auth/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: mobile, Otp: otp }),
-      });
-      if (response.ok) {
-        alert('OTP Verified!');
-        // Optionally navigate to the next screen here
-      } else {
-        alert('Invalid OTP.');
+      const response = await verifyOtp(mobile, otp);
+      
+      if (response.data.token) {
+        await login(response.data.token);
       }
+      
+      alert('OTP Verified!');
+      router.replace('/home');
     } catch (error) {
-      alert('Network error.');
+      console.error('OTP verification error:', error);
+      alert('Invalid OTP.');
     }
   };
 
   const handleResend = async () => {
     setResendDisabled(true);
     try {
-      const response = await fetch(`${environment.apiUrl}/api/auth/request-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: mobile }),
-      });
-      if (response.ok) {
-        alert('OTP resent!');
-      } else {
-        alert('Failed to resend OTP.');
-      }
+      await requestOtp(mobile);
+      alert('OTP resent!');
     } catch (error) {
-      alert('Network error.');
+      console.error('Resend OTP error:', error);
+      alert('Failed to resend OTP.');
     }
     setTimeout(() => setResendDisabled(false), 30000); // 30s cooldown
   };

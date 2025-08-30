@@ -1,10 +1,9 @@
-import { environment } from '@/app/environments/environment';
-import axios from 'axios';
+import { api } from './apiClient';
 
-const BASE_URL = `${environment.apiUrl}/api/auth`;
+const BASE_URL = '/api/auth';
 
 export const requestOtp = (phoneNumber: string) =>
-  axios.post(`${BASE_URL}/request-otp`, { phoneNumber });
+  api.post(`${BASE_URL}/request-otp`, { phoneNumber });
 
 export const verifyOtp = (phoneNumber: string, otp: string) =>
-  axios.post(`${BASE_URL}/verify-otp`, { phoneNumber, otp });
+  api.post(`${BASE_URL}/verify-otp`, { phoneNumber, otp });

@@ -1,36 +1,35 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Alert, View, ActivityIndicator } from 'react-native';
 import { environment } from './environments/environment';
 import HomeScreen from './home';
+import { useAuth } from './AuthContext';
 
 export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  const handleRequestOtp = async () => {
-    if (phone.length !== 11) {
-      return Alert.alert('Error', 'Phone number must be 11 digits');
+  // If not authenticated, redirect to sign-in
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/sign-in');
     }
+  }, [isAuthenticated, isLoading]);
 
-    try {
-      const response = await fetch(`${environment.apiUrl}/api/auth/request-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: phone }),
-      });
+  // Show loading while checking auth status
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#32CCBC" />
+      </View>
+    );
+  }
 
-      if (response.ok) {
-        router.push({ pathname: '/verify', params: { phone } });
-      } else {
-        Alert.alert('Error', 'Failed to send OTP');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Network error');
-    }
-  };
+  // If authenticated, show home screen
+  if (isAuthenticated) {
+    return <HomeScreen />;
+  }
 
-  return (
-      <HomeScreen />
-  );
+  return null; // This will show briefly before redirect
 }

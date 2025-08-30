@@ -1,13 +1,23 @@
 import CryptoJS from 'crypto-js';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { environment } from './environments/environment';
+import { requestOtp } from '../services/authApi';
+import { useAuth } from './AuthContext';
 
 export default function SignInScreen() {
   const [mobile, setMobile] = useState('');
+  const { isAuthenticated } = useAuth();
   // Use a secret key (keep it consistent in both files, but don't expose in public repos)
-    const SECRET_KEY = 'your-very-secret-key';
+  const SECRET_KEY = 'your-very-secret-key';
+
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/home');
+    }
+  }, [isAuthenticated]);
 
   const handleLogin = async () => {
     if (mobile.length !== 10) {
@@ -16,20 +26,13 @@ export default function SignInScreen() {
     }
     const fullMobile = '+880' + mobile;
     try {
-      const response = await fetch(`${environment.apiUrl}/api/auth/request-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: fullMobile }),
-      });
-      if (response.ok) {
-        alert('OTP sent successfully!');
-        const encrypted = CryptoJS.AES.encrypt(fullMobile, SECRET_KEY).toString();
-        router.push({ pathname: '/otp-screen', params: { token: encrypted } });
-      } else {
-        alert('Failed to send OTP.');
-      }
+      await requestOtp(fullMobile);
+      alert('OTP sent successfully!');
+      const encrypted = CryptoJS.AES.encrypt(fullMobile, SECRET_KEY).toString();
+      router.push({ pathname: '/otp-screen', params: { token: encrypted } });
     } catch (error: any) {
-      alert('Network error.');
+      console.error('Request OTP error:', error);
+      alert('Failed to send OTP.');
     }
   };
 

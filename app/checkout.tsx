@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { CartItems } from "./cart";
 import { environment } from "./environments/environment";
+import { orderApi } from '../services/apiService';
 
 export default function CheckoutScreen() {
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -36,7 +37,7 @@ export default function CheckoutScreen() {
   const handleOrderButtonClick = async() => {
     if (isPlacingOrder) return;
     setIsPlacingOrder(true);
-    //Need to call Backend API to place order
+    
     if (!name || !address || !mobileNumber) {
       alert("Please fill all fields");
       setIsPlacingOrder(false);
@@ -65,18 +66,11 @@ export default function CheckoutScreen() {
       items: updatedOrderSummary.items,
       total: updatedOrderSummary.total,
     };
+    
     try {
-      const response = await fetch(`${environment.apiUrl}/api/order/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderDetails),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to place order');
-      }
+      await orderApi.create(orderDetails);
       alert("Order placed successfully");
+      
       // Clear cart after successful order
       await AsyncStorage.removeItem("cartItems");
       await AsyncStorage.removeItem("cart");
@@ -87,13 +81,13 @@ export default function CheckoutScreen() {
         total: 0,
         items: [],
       });
-      setIsPlacingOrder(false);
     } catch (error) {
       console.error("Error placing order:", error);
       alert("Failed to place order. Please try again.");  
+    } finally {
       setIsPlacingOrder(false);
+    }
   }
-}
 
   useEffect(() => {
     AsyncStorage.getItem("cartItems").then((data) => {
