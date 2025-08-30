@@ -2,13 +2,12 @@ import { Button } from "@react-navigation/elements";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { environment } from "./environments/environment";
+import { productApi, Product } from '../services/apiService';
+import { getToken } from '../services/authService';
+import { testTokenInRequest } from '../services/apiClient';
 
-export interface Product {
-  id?: string | number;
-  name?: string;
-  description?: string;
-  price?: number;
-  svgImage?: string;
+// Extend the Product interface to include quantity for cart functionality
+interface CartProduct extends Product {
   quantity?: number;
 }
 
@@ -17,17 +16,21 @@ function getSvgXml(svgImage?: string) {
 }
 
 interface ShowProductsProps {
-  addedToCart: Product[];
-  setAddedToCart: React.Dispatch<React.SetStateAction<Product[]>>;
+  addedToCart: CartProduct[];
+  setAddedToCart: React.Dispatch<React.SetStateAction<CartProduct[]>>;
 }
 
 export default function ShowProducts({ addedToCart, setAddedToCart }: ShowProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
+  
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await fetch(`${environment.apiUrl}/api/product`);
-      const data = await response.json();
-      setProducts(data);
+      try {
+        const response = await productApi.getAll();
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
     };
     fetchProducts();
   }, []);
@@ -43,7 +46,6 @@ export default function ShowProducts({ addedToCart, setAddedToCart }: ShowProduc
 
   return (
     <View style={styles.outerContainer}>
-      <Text style={styles.productLabel}>Product</Text>
       <View style={styles.container}>
         {products.map((product, idx) => {
           const isAdded = addedToCart?.some((p) => p.id === product.id);

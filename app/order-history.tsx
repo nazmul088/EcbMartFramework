@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { environment } from './environments/environment';
+import { orderApi, OrderHistory } from '../services/apiService';
 
 interface OrderHistory {
   orderId: string;
@@ -32,12 +33,8 @@ export default function OrderHistoryScreen() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${environment.apiUrl}/api/order-history/all`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch order history');
-        }
-        const data = await response.json();
-        setOrders(data);
+        const response = await orderApi.getHistory();
+        setOrders(response.data);
       } catch (err: any) {
         setError(err.message || 'Error loading order history');
       } finally {

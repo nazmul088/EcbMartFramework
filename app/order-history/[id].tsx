@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { environment } from '../environments/environment';
+import { orderApi, OrderDetails } from '../../services/apiService';
 
 // Updated interfaces to match sample JSON
 interface OrderItem {
@@ -59,12 +60,8 @@ export default function OrderHistoryDetails() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${environment.apiUrl}/api/order-history/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch order details');
-        }
-        const data = await response.json();
-        setOrder(data);
+        const response = await orderApi.getById(id as string);
+        setOrder(response.data);
       } catch (err: any) {
         setError(err.message || 'Error loading order details');
       } finally {
