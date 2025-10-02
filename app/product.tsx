@@ -1,10 +1,7 @@
 import { Button } from "@react-navigation/elements";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
-import { environment } from "./environments/environment";
-import { productApi, Product } from '../services/apiService';
-import { getToken } from '../services/authService';
-import { testTokenInRequest } from '../services/apiClient';
+import { Product, productApi } from '../services/apiService';
 
 // Extend the Product interface to include quantity for cart functionality
 interface CartProduct extends Product {
@@ -46,6 +43,7 @@ export default function ShowProducts({ addedToCart, setAddedToCart }: ShowProduc
 
   return (
     <View style={styles.outerContainer}>
+      <Text style={styles.productLabel}>Our Products</Text>
       <View style={styles.container}>
         {products.map((product, idx) => {
           const isAdded = addedToCart?.some((p) => p.id === product.id);
@@ -135,14 +133,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   productLabel: {
-    position: 'absolute',
-    top: 6,
-    left: 8,
-    backgroundColor: 'white',
-    paddingHorizontal: 8,
+    position: 'relative',
+    top: 0,
+    left: 16,
+    backgroundColor: '#32CCBC',
+    paddingHorizontal: 16,
+    paddingVertical: 4,
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
+    borderRadius: 8,
     zIndex: 1,
+    shadowColor: '#32CCBC',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+    alignSelf: 'flex-start',
   },
 });
