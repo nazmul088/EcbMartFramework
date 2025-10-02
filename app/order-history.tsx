@@ -1,8 +1,8 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { environment } from './environments/environment';
 import { orderApi, OrderHistory } from '../services/apiService';
 
 interface OrderHistory {
@@ -50,8 +50,16 @@ export default function OrderHistoryScreen() {
         colors={["#90F7EC", "#32CCBC"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={{ padding: 8, height: 53 }}
-      />
+        style={{ padding: 8, height: 53, flexDirection: 'row', alignItems: 'center' }}
+      >
+        <MaterialIcons
+          name="arrow-back"
+          size={28}
+          color="#222"
+          style={{ marginRight: 12 }}
+          onPress={() => router.back()}
+        />
+      </LinearGradient>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Order History</Text>
         {loading ? (
