@@ -39,9 +39,6 @@ useEffect(() => {
   };
 
   const toggleDrawer = () => {
-    console.log('Toggle drawer clicked, current state:', isDrawerOpen);
-    console.log('Drawer width:', drawerWidth);
-    console.log('Screen width:', screenWidth);
     if (isDrawerOpen) {
       Animated.timing(drawerAnimation, {
         toValue: -drawerWidth,
@@ -107,6 +104,14 @@ useEffect(() => {
           >
             <MaterialIcons name="home" size={24} color="#32CCBC" />
             <Text style={styles.drawerItemText}>Home</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => handleDrawerNavigation('/profile')}
+          >
+            <MaterialIcons name="person" size={24} color="#32CCBC" />
+            <Text style={styles.drawerItemText}>Profile</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
