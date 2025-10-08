@@ -32,6 +32,27 @@ export interface OrderHistory {
   orderTotal: string;
 }
 
+export interface DeliveryAddress {
+  id: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  isDefault: boolean;
+  label?: string;
+}
+
+export interface UserProfile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  deliveryAddresses: DeliveryAddress[];
+}
+
 // Product APIs
 export const productApi = {
   getAll: () => api.get<Product[]>('/api/product'),
@@ -46,6 +67,25 @@ export const orderApi = {
   getHistory: () => api.get<OrderHistory[]>('/api/order-history/all'),
   
   getById: (id: string) => api.get<OrderDetails>(`/api/order-history/${id}`),
+};
+
+// Profile APIs
+export const profileApi = {
+  get: () => api.get<UserProfile>('/api/profile'),
+  
+  update: (profileData: UserProfile) => api.put('/api/profile', profileData),
+  
+  addAddress: (address: Omit<DeliveryAddress, 'id'>) => 
+    api.post('/api/profile/addresses', address),
+  
+  updateAddress: (addressId: string, address: Omit<DeliveryAddress, 'id'>) => 
+    api.put(`/api/profile/addresses/${addressId}`, address),
+  
+  deleteAddress: (addressId: string) => 
+    api.delete(`/api/profile/addresses/${addressId}`),
+  
+  setDefaultAddress: (addressId: string) => 
+    api.put(`/api/profile/addresses/${addressId}/default`),
 };
 
 // Auth APIs (using the existing authApi.ts)
